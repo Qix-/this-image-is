@@ -21,7 +21,7 @@ if ! command -v 'luarocks'; then
 		brew install luarocks protobuf hdf5 graphviz
 	elif command -v 'apt'; then
 		echo 'attempting to install deps; will require sudo'
-		sudo apt-get -y install luarocks libprotobuf-dev protobuf-compiler graphviz
+		sudo apt-get -y install luarocks libprotobuf-dev protobuf-compiler graphviz libhdf5-dev
 	else
 		echo 'cannot automatically install deps; please install it and re-run' >&2
 		exit 1
@@ -29,13 +29,10 @@ if ! command -v 'luarocks'; then
 fi
 
 luarocks install nn
-echo build nn
 luarocks install nngraph
-echo build nngraph
 luarocks install image
-echo build image
 luarocks install loadcaffe
-echo build loadcaffe
+luarocks install hdf5
 
 if [ ! -f env/snapshot.zip ]; then
 	curl http://cs.stanford.edu/people/karpathy/neuraltalk2/checkpoint_v1_cpu.zip -o env/snapshot.zip
