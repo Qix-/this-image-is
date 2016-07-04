@@ -101,7 +101,7 @@ class RedditBot(object):
 
 		if not path.isfile(RedditBot.SESSFP):
 			# we have to init the bot.
-			url = self._reddit.get_authorize_url('uniqueKey', ['identity', 'submit', 'report'], True)
+			url = self._reddit.get_authorize_url('uniqueKey', ['identity', 'submit', 'report', 'read'], True)
 			print 'Please visit the following URL and click allow. It will redirect you to a 404; the URL will have a `code` query param. Copy its value here.'
 			print url
 			code = raw_input('Code: ')
@@ -145,7 +145,7 @@ class RedditBot(object):
 		# we create a wrapper generator here so we can hold the latest placeholder
 		def wrap():
 			place_holder = sub.get('place_holder')
-			new = sub.get('sub').get_new(place_holder=place_holder, _use_oauth=False)
+			new = sub.get('sub').get_new(place_holder=place_holder)
 			placed = False
 
 			for submission in new:
