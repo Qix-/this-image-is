@@ -17,7 +17,7 @@ def main():
 	recognizer = BatchRecognizer('/tmp/tii-recognizer')
 
 	bot = RedditBot(config)
-	bot.subscribe('test')
+	bot.subscribe(*config.get('subscriptions'))
 
 	while True:
 		sleep_amount = 10
