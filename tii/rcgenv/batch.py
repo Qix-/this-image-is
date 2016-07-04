@@ -58,6 +58,11 @@ class BatchRecognizer(object):
 			return []
 
 		process = subprocess.Popen(['th', './eval.lua', '-model', self._model, '-image_folder', self._root, '-num_images', '-1', '-gpuid', '-1'], stdout=subprocess.PIPE, cwd='./ext/neuraltalk2')
+		process.wait()
+		if process.returncode != 0:
+			print process.communicate()[0]
+			print process.communicate()[1]
+			raise Exception('problem during recognition')
 
 		output = process.communicate()[0]
 
