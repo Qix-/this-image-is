@@ -39,7 +39,9 @@ class BatchRecognizer(object):
 		os.makedirs(self._root)
 
 		# create a reverse map of filenames urls
+		has_some = False
 		for submission, url in urls:
+			has_some = True
 			urll = urlparse(url)
 			_, ext = os.path.splitext(urll.path)
 			filepath = os.path.join(self._root, submission.name) + ext
@@ -51,6 +53,9 @@ class BatchRecognizer(object):
 			with file(filepath, 'wb') as out:
 				response.raw.decode_content = True
 				shutil.copyfileobj(response.raw, out)
+
+		if not has_some:
+			return []
 
 		process = subprocess.Popen(['th', './eval.lua', '-model', self._model, '-image_folder', self._root, '-num_images', '-1', '-gpuid', '-1'], stdout=subprocess.PIPE, cwd='./ext/neuraltalk2')
 
