@@ -57,7 +57,7 @@ class RedditBot(object):
 			template = templatefd.read()
 
 		for submission, caption in pairs:
-			self._comment_queue.insert(0, (submission, caption))
+			self._comment_queue.append((submission, caption))
 
 		# the following block is to be as terse as possible
 		# so that any RateLimiting exceptions that are raised
