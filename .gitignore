@@ -1,4 +1,6 @@
-# Created by https://www.gitignore.io/api/python,vim,osx,windows,linux,lua,cmake,virtualenv,pycharm
+# Configuration
+/config.json
+/tii-session.json
 
 ### Python ###
 # Byte-compiled / optimized / DLL files
@@ -288,5 +290,5 @@ fabric.properties
 
 # *.iml
 # modules.xml
-# .idea/misc.xml 
+# .idea/misc.xml
 # *.ipr
