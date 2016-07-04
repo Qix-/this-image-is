@@ -1,0 +1,6 @@
+[submodule "ext/neuraltalk2"]
+	path = ext/neuraltalk2
+	url = git@github.com:karpathy/neuraltalk2.git
+[submodule "ext/torch"]
+	path = ext/torch
+	url = git@github.com:torch/distro
