@@ -1,14 +1,10 @@
 """ThisImageIs main script"""
 import json
-import os
-import shutil
 import sys
 import time
 
 from tii.reddit import RedditBot
 from tii.rcgenv.batch import BatchRecognizer
-
-REC_PATH = '/tmp/tii-recognizer'
 
 
 def main():
@@ -16,18 +12,14 @@ def main():
 	with file(sys.argv[1]) as cnffd:
 		config = json.load(cnffd)
 
-	# clear out any old tmp directory
-	if os.path.exists(REC_PATH):
-		shutil.rmtree(REC_PATH)
-	os.makedirs(REC_PATH)
-
-	recognizer = BatchRecognizer(REC_PATH)
+	recognizer = BatchRecognizer('/tmp/tii-recognizer')
 
 	bot = RedditBot(config)
 	bot.subscribe('test', 'funny', 'pics', 'mildlyinteresting')
 
 	while True:
-		recognizer.recognize(bot.get_new_images())
+		for r in recognizer.recognize(bot.get_new_images()):
+			print repr(r)
 		time.sleep(10)
 
 
