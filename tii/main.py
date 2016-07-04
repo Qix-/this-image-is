@@ -5,6 +5,7 @@ import time
 import traceback
 
 from praw.errors import RateLimitExceeded
+from tii.ratelimit import rate_limit
 from tii.reddit import RedditBot
 from tii.rcgenv.batch import BatchRecognizer
 
@@ -25,7 +26,8 @@ def main():
 			bot.post_captions(recognizer.recognize(bot.get_new_images()))
 		except RateLimitExceeded as e:
 			print 'detected rate limit (%s)' % str(e)
-			sleep_amount = 8.5 * 60
+			sleep_amount = rate_limit(e)
+			print 'sleeping for %d seconds...' % sleep_amount
 		except:
 			print traceback.format_exc()
 			print 'sleeping for a few minutes to recover...'
