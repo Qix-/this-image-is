@@ -9,6 +9,12 @@ import praw
 SUPPORTED_EXTENSIONS = ['.jpg', '.png', '.gif']
 
 
+def populate(template, **kwargs):
+	for key, val in kwargs.iteritems():
+		template = template.replace('{{%s}}' % key, str(val))
+	return template
+
+
 class RedditBot(object):
 	USER_AGENT = 'ThisImageIs daemon (by u/i-am-qix)'
 	SESSFP = './tii-session.json'
@@ -16,6 +22,7 @@ class RedditBot(object):
 	def __init__(self, config):
 		self._subreddit = {}
 		self._subscriptions = set()
+		self._comment_queue = []
 
 		self._reddit = praw.Reddit(user_agent=RedditBot.USER_AGENT, log_requests=0, cache_timeout=10)  # XXX DEBUG TODO SET cache_timeout TO 120
 		self._reddit.set_oauth_app_info(**config.get('oauth'))
@@ -44,6 +51,36 @@ class RedditBot(object):
 					yield (link, link.url)
 		return filter()
 
+	def post_captions(self, pairs):
+		template = ''
+		with file('./template.txt', 'r') as templatefd:
+			template = templatefd.read()
+
+		for submission, caption in pairs:
+			self._comment_queue.insert(0, (submission, caption))
+
+		# the following block is to be as terse as possible
+		# so that any RateLimiting exceptions that are raised
+		# can be caught by the consumer and acted upon in an
+		# appilcation specific way.
+		to_hide = []
+		try:
+			while len(self._comment_queue) > 0:
+				submission, caption = self._comment_queue[-1]
+				content = populate(template, caption=caption)
+				submission.add_comment(content)
+				print '\x1b[1m%s\x1b[m -> %s' % (caption, submission.permalink)
+				self._comment_queue.pop()
+				to_hide.append(submission.name)
+		finally:
+			if len(to_hide) > 0:
+				print 'hiding %d things' % len(to_hide)
+				self._reddit.hide(to_hide)
+
+	@property
+	def backlog(self):
+		return len(self._comment_queue)
+
 	def _get_new_links(self):
 		def filter():
 			for submission in self._get_new_submissions():
@@ -64,7 +101,7 @@ class RedditBot(object):
 
 		if not path.isfile(RedditBot.SESSFP):
 			# we have to init the bot.
-			url = self._reddit.get_authorize_url('uniqueKey', 'identity', True)
+			url = self._reddit.get_authorize_url('uniqueKey', ['identity', 'submit', 'report'], True)
 			print 'Please visit the following URL and click allow. It will redirect you to a 404; the URL will have a `code` query param. Copy its value here.'
 			print url
 			code = raw_input('Code: ')
