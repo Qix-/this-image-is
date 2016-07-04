@@ -4,3 +4,6 @@
 [submodule "ext/torch"]
 	path = ext/torch
 	url = https://github.com/torch/distro.git
+[submodule "ext/nanomsg"]
+	path = ext/nanomsg
+	url = https://github.com/nanomsg/nanomsg.git
