@@ -23,8 +23,8 @@ def main():
 		sleep_amount = 10
 		try:
 			bot.post_captions(recognizer.recognize(bot.get_new_images()))
-		except RateLimitExceeded:
-			print 'detected rate limit'
+		except RateLimitExceeded as e:
+			print 'detected rate limit (%s)' % str(e)
 			sleep_amount = 8.5 * 60
 		except:
 			print traceback.format_exc()
