@@ -19,7 +19,7 @@ mkdir -p env/build
 if ! command -v 'luarocks'; then
 	if command -v 'brew'; then
 		brew install luarocks protobuf hdf5 graphviz
-	elif command -v 'apt'; then
+	elif command -v 'apt-get'; then
 		echo 'attempting to install deps; will require sudo'
 		sudo apt-get -y install luarocks libprotobuf-dev protobuf-compiler graphviz libhdf5-dev
 	else
