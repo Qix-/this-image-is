@@ -10,14 +10,18 @@ virtualenv env
 pip install -r requirements.txt
 
 (yes | bash < ext/torch/install-deps) || echo An error occurred here\; bravely going forth.
-(yes | bash < ext/torch/install.sh) || echo An error occurred here\; bravely going forth.
+(cd ext/torch && yes n | ./install.sh) || echo An error occurred here\; bravely going forth.
+export PATH=`pwd`/ext/torch/install/bin:$PATH
+
+mkdir -p env/build
+(cd env/build && cmake ../../ext/nanomsg && cmake --build . && sudo cmake --build . --target install)
 
 if ! command -v 'luarocks'; then
 	if command -v 'brew'; then
-		brew install luarocks protobuf hdf5
+		brew install luarocks protobuf hdf5 graphviz
 	elif command -v 'apt'; then
 		echo 'attempting to install deps; will require sudo'
-		yes | sudo apt-get install luarocks libprotobuf-dev protobuf-compiler
+		sudo apt-get -y install luarocks libprotobuf-dev protobuf-compiler graphviz
 	else
 		echo 'cannot automatically install deps; please install it and re-run' >&2
 		exit 1
@@ -25,9 +29,13 @@ if ! command -v 'luarocks'; then
 fi
 
 luarocks install nn
+echo build nn
 luarocks install nngraph
+echo build nngraph
 luarocks install image
+echo build image
 luarocks install loadcaffe
+echo build loadcaffe
 
 if [ ! -f env/snapshot.zip ]; then
 	curl http://cs.stanford.edu/people/karpathy/neuraltalk2/checkpoint_v1_cpu.zip -o env/snapshot.zip
