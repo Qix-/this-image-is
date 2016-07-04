@@ -17,7 +17,7 @@ if ! command -v 'luarocks'; then
 		brew install luarocks protobuf hdf5
 	elif command -v 'apt'; then
 		echo 'attempting to install deps; will require sudo'
-		yes | sudo apt-get install luarocks libprotobuf-dev protobuf-compiler torch-hdf5 hf5py
+		yes | sudo apt-get install luarocks libprotobuf-dev protobuf-compiler
 	else
 		echo 'cannot automatically install deps; please install it and re-run' >&2
 		exit 1
