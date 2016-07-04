@@ -2,8 +2,11 @@
 import json
 import os
 from os import path
+from urlparse import urlparse, urlunparse
 
 import praw
+
+SUPPORTED_EXTENSIONS = ['.jpg', '.png', '.gif']
 
 
 class RedditBot(object):
@@ -12,6 +15,7 @@ class RedditBot(object):
 
 	def __init__(self, config):
 		self._subreddit = {}
+		self._subscriptions = set()
 
 		self._reddit = praw.Reddit(user_agent=RedditBot.USER_AGENT, log_requests=0, cache_timeout=10)  # XXX DEBUG TODO SET cache_timeout TO 120
 		self._reddit.set_oauth_app_info(**config.get('oauth'))
@@ -21,6 +25,38 @@ class RedditBot(object):
 
 		me = self._reddit.get_me()
 		print 'signed into Reddit as %s' % me.name
+
+	def subscribe(self, *args):
+		self._subscriptions |= set(args)
+
+	def get_new_images(self):
+		def filter():
+			for link in self._get_new_links():
+				urll = urlparse(link.url)
+				base, ext = path.splitext(urll.path)
+				if urll.scheme not in ['http', 'https']:
+					continue
+				if urll.netloc in ['www.imgur.com', 'imgur.com']:
+					inetloc = 'i.imgur.com'
+					ipath = '%s.png' % path.basename(urll.path)
+					yield (link, urlunparse([urll.scheme, inetloc, ipath, None, None, None]))
+				elif ext is not None and ext in SUPPORTED_EXTENSIONS:
+					yield (link, link.url)
+		return filter()
+
+	def _get_new_links(self):
+		def filter():
+			for submission in self._get_new_submissions():
+				if not submission.is_self:
+					yield submission
+		return filter()
+
+	def _get_new_submissions(self):
+		def compose():
+			for r in self._subscriptions:
+				for ns in self._get_r_submissions(r):
+					yield ns
+		return compose()
 
 	def _refresh_access(self, force_init=False):
 		if force_init and path.isfile(RedditBot.SESSFP):
@@ -79,7 +115,6 @@ class RedditBot(object):
 				if submission.id == place_holder:
 					continue
 				if not placed:
-					print 'setting place_holder: %s' % submission.id
 					sub['place_holder'] = submission.id
 					placed = True
 				yield submission

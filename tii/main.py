@@ -12,9 +12,11 @@ def main():
 		config = json.load(cnffd)
 
 	bot = RedditBot(config)
+	bot.subscribe('test', 'funny', 'pics', 'mildlyinteresting')
+
 	while True:
-		for p in bot._get_r_submissions('test'):
-			print p.id
+		for sub, url in bot.get_new_images():
+			print '%s: %s' % (sub.subreddit, url)
 		time.sleep(2)
 
 
