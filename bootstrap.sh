@@ -16,16 +16,14 @@ export PATH=`pwd`/ext/torch/install/bin:$PATH
 mkdir -p env/build
 (cd env/build && cmake ../../ext/nanomsg && cmake --build . && sudo cmake --build . --target install)
 
-if ! command -v 'luarocks'; then
-	if command -v 'brew'; then
-		brew install luarocks protobuf hdf5 graphviz
-	elif command -v 'apt-get'; then
-		echo 'attempting to install deps; will require sudo'
-		sudo apt-get -y install luarocks libprotobuf-dev protobuf-compiler graphviz libhdf5-dev
-	else
-		echo 'cannot automatically install deps; please install it and re-run' >&2
-		exit 1
-	fi
+if command -v 'brew'; then
+	brew install protobuf hdf5 graphviz
+elif command -v 'apt-get'; then
+	echo 'attempting to install deps; will require sudo'
+	sudo apt-get -y install luarocks libprotobuf-dev protobuf-compiler graphviz libhdf5-dev
+else
+	echo 'cannot automatically install deps; please install it and re-run' >&2
+	exit 1
 fi
 
 luarocks install nn
