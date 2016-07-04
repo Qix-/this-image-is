@@ -11,8 +11,9 @@ class RedditBot(object):
 	SESSFP = './tii-session.json'
 
 	def __init__(self, config):
-		self._access = None
-		self._reddit = praw.Reddit(user_agent=RedditBot.USER_AGENT)
+		self._subreddit = {}
+
+		self._reddit = praw.Reddit(user_agent=RedditBot.USER_AGENT, log_requests=0, cache_timeout=10)  # XXX DEBUG TODO SET cache_timeout TO 120
 		self._reddit.set_oauth_app_info(**config.get('oauth'))
 
 		# refresh access
@@ -55,4 +56,32 @@ class RedditBot(object):
 					print 'invalid/missing token in session file; re-initing (requires user input)'
 					return self._refresh_access(force_init=True)
 
-			self._reddit.refresh_access_information(refresh_token)
+			print 'refreshing access information...'
+			access_information = self._reddit.refresh_access_information(refresh_token)
+
+			print 'signing in'
+			self._reddit.set_access_credentials(**access_information)
+
+	def _get_r_submissions(self, r):
+		if r not in self._subreddit:
+			print 'initializing subreddit: %s' % r
+			self._subreddit[r] = {'sub': self._reddit.get_subreddit(r)}
+
+		sub = self._subreddit[r]
+
+		# we create a wrapper generator here so we can hold the latest placeholder
+		def wrap():
+			place_holder = sub.get('place_holder')
+			new = sub.get('sub').get_new(place_holder=place_holder, _use_oauth=False)
+			placed = False
+
+			for submission in new:
+				if submission.id == place_holder:
+					continue
+				if not placed:
+					print 'setting place_holder: %s' % submission.id
+					sub['place_holder'] = submission.id
+					placed = True
+				yield submission
+
+		return wrap()
